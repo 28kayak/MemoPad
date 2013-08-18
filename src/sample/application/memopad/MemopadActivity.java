@@ -17,6 +17,7 @@ import android.widget.EditText;
 
 public class MemopadActivity extends Activity 
 {
+	
 
     private static final EditText EditText = null;
 	@Override
@@ -25,7 +26,7 @@ public class MemopadActivity extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
     }
-
+	
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) 
@@ -48,5 +49,7 @@ public class MemopadActivity extends Activity
 		editor.putInt("cursor",Selection.getSelectionStart(et.getText()));//store current place of cursor.
 		editor.commit();	
 	}//onStop()
+	
+	
     
 }
