@@ -25,6 +25,12 @@ public class MemopadActivity extends Activity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        EditText et = (EditText)findVieById(R.id.editText1);
+        SharedPreferences pref = this.getSharedPreferences("MemoPrefs", MODE_PRIVATE);
+        et.setText(pref.getString("memo", ""));
+        et.setSelection(pref.getInt("cursor", 0));
+        
+        
     }
 	
 
