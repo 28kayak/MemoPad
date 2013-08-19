@@ -1,5 +1,6 @@
 package sample.application.memopad;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.app.Activity;
 import android.view.Menu;
@@ -7,6 +8,7 @@ import android.view.MenuItem;
 import android.content.Intent;
 //additional imports 
 import android.content.SharedPreferences;
+import android.text.Editable;
 //class to save user data 
 import android.text.Selection;
 //Utility class for manipulating cursors and selections in CharSequences.
@@ -20,6 +22,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.content.ContentValues;
 //import to show menu
 import android.view.MenuInflater;
+//automatic saving system
+import android.text.TextWatcher;
 
 
 
@@ -28,6 +32,10 @@ public class MemopadActivity extends Activity
 	
 
     private static final EditText EditText = null;
+    //automatic saving system
+    boolean memoChanged = false;//store boolean if memo is modified or not
+    String fn;
+    String encode = "SHIFT-JIS";   		
 	@Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -35,10 +43,42 @@ public class MemopadActivity extends Activity
         setContentView(R.layout.activity_main);
         EditText et = (EditText)findVieById(R.id.editText1);
         SharedPreferences pref = this.getSharedPreferences("MemoPrefs", MODE_PRIVATE);
+        memoChanged = pref.getBoolean("memoChanged", false);
         et.setText(pref.getString("memo", ""));
         et.setSelection(pref.getInt("cursor", 0));
         
+        fn = pref.getString("fn", "");
+        encode = pref.getString("encode", "SHIFT-JIS");
         
+        Intent i = getIntent();
+        Uri uri =i.getData();
+        String tempFn;
+        if(uri != null)
+        {
+        	tempFn = i.getData().getPath();
+        }
+        if(tempFn.length() > 0)
+        {
+        	if(memoChanged)
+        	{
+        		saveMemo();
+        	}
+        	fn = tempFn;
+        	et.setText(readFile());
+        	memoChanged = false;
+        }
+        TextWatcher tw = new TextWatcher(){
+        	@Override
+        	public void afterTextChanged(Editable arg0){}
+        	@Override
+        	public void beforeTextChanged(CharSequence s, int start, int count, int after){}
+        	@Override
+        	public void onTextChanged(CharSequence s, int start, int before,int count)
+        	{
+        		memoChanged  = true;
+        	}
+        };
+        et.addTextChangedListener(tw);
     }
 	
 
@@ -62,6 +102,7 @@ public class MemopadActivity extends Activity
 		SharedPreferences pref = getSharedPreferences("MemoPrefs",MODE_PRIVATE);
 		SharedPreferences.Editor editor = pref.edit();
 		editor.putString("memo", et.getText().toString());
+		editor.putBoolean("memoChanged", memoChanged);
 		editor.putInt("cursor",Selection.getSelectionStart(et.getText()));//store current place of cursor.
 		editor.commit();	
 	}//onStop()
@@ -114,6 +155,7 @@ public class MemopadActivity extends Activity
 			{
 				case 0:
 					et.setText(data.getStringExtra("text"));
+					memoChanged = false;
 					break;
 			}
 		}
@@ -131,10 +173,18 @@ public class MemopadActivity extends Activity
 				saveMemo();
 				break;
 			case R.id.menu_open:
+				if(memoChanged)
+				{
+					saveMemo();
+				}
 				Intent i = new Intent(this, MemoList.class);
 				startActivityForResult(i,0);//activate MemoList by using Intent
 				break;
 			case R.id.menu_new: 
+				if(memoChanged)
+				{
+					saveMemo();
+				}
 				et.setText("");
 				break;
 		}//switch
