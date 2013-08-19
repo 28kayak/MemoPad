@@ -3,6 +3,8 @@ package sample.application.memopad;
 import android.os.Bundle;
 import android.app.Activity;
 import android.view.Menu;
+import android.view.MenuItem;
+import android.content.Intent;
 //additional imports 
 import android.content.SharedPreferences;
 //class to save user data 
@@ -45,7 +47,9 @@ public class MemopadActivity extends Activity
     {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
-        return true;
+        MenuInflater mi = getMenuInflater();
+        mi.inflate(R.menu.menu, menu);
+        return super.onCreateOptionsMenu(menu);
     }//onCreateOptionsMenu()
 
 
@@ -96,6 +100,45 @@ public class MemopadActivity extends Activity
 			db.insertOrThrow("memoDB", null, values);
 			memos.close();//exit from MemoDBHelper
 		}
+	}
+
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data)
+	{
+		super.onActivityResult(requestCode, resultCode, data);
+		if(resultCode == RESULT_OK)
+		{
+			EditText et = (EditText) findViewById(R.id.editText1);
+			switch(requestCode)
+			{
+				case 0:
+					et.setText(data.getStringExtra("text"));
+					break;
+			}
+		}
+		
+	}
+
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item)
+	{
+		EditText et = (EditText) findVieById(R.id.editText1);
+		switch (item.getItemId())
+		{
+			case R.id.menu_save:
+				saveMemo();
+				break;
+			case R.id.menu_open:
+				Intent i = new Intent(this, MemoList.class);
+				startActivityForResult(i,0);//activate MemoList by using Intent
+				break;
+			case R.id.menu_new: 
+				et.setText("");
+				break;
+		}//switch
+		return super.onOptionsItemSelected(item);
 	}
 	
 	
