@@ -3,12 +3,20 @@ package sample.application.memopad;
 import android.app.ListActivity;
 import android.os.Bundle;
 import android.support.v4.widget.SimpleCursorAdapter;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
 //added imports 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.content.Intent;
+//function to delete memos
+import android.view.MenuInflater;
+import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 
 public class MemoList extends ListActivity
 {
@@ -61,5 +69,28 @@ public class MemoList extends ListActivity
 			setListAdapter(adapter);
 		}
 		memos.close();
+	}
+
+	@Override
+	public boolean onContextItemSelected(MenuItem item) 
+	{
+		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+		Cursor cursor = getMemos();
+		startManagingCursor(cursor);
+		cursor.moveToPosition(info.position);
+		final int columnid = cursor.getInt(2);
+		
+		AlertDialog.Builder ab = new AlertDialog.Builder(this);
+		ab.setTitle(R.string.memodb_delete);
+		ab.setMessage(R.string.memodb_confirm_delete);
+		return super.onContextItemSelected(item);
+	}
+
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v,ContextMenuInfo menuInfo) 
+	{
+		super.onCreateContextMenu(menu, v, menuInfo);
+		MenuInflater mi = getMenuInflater();
+		mi.inflate(R.menu.contextmenu, menu);
 	}
 }
