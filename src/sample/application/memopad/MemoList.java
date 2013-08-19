@@ -48,6 +48,8 @@ public class MemoList extends ListActivity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.memolist);
 		showMemos(getMemos());
+		ListView lv = (ListView) this.findViewById(android.R.id.list);
+		registerForContextMenu(lv);
 	}
 	private Cursor getMemos()
 	{
@@ -83,6 +85,26 @@ public class MemoList extends ListActivity
 		AlertDialog.Builder ab = new AlertDialog.Builder(this);
 		ab.setTitle(R.string.memodb_delete);
 		ab.setMessage(R.string.memodb_confirm_delete);
+		ab.setPositiveButton(R.string.button_ok, new DialogInterface.OnClickListener(){ 
+			
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				SQLiteDatabase db = memos.getWritableDatabase();
+				db.delete("memoDB", "_id=" + columnid, null);
+				db.close();
+				showMemos(getMemos());
+				
+			}//onClick
+		});
+		ab.setNegativeButton(R.string.button_cancel, new DialogInterface.OnClickListener() {
+			
+			@Override
+			public void onClick(DialogInterface dialog, int which) 
+			{
+				
+			}
+		});
+		ab.show();
 		return super.onContextItemSelected(item);
 	}
 
